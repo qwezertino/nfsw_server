@@ -35,7 +35,9 @@ echo "  => $SELFDIR/freeroam/freeroamd"
 # ── Race server (pre-built JAR) ───────────────────────────────────────────────
 step "Copying Race server..."
 cp -f "$REPOS/src/sbrw-mp-sync-2018/sbrw-mp.jar" "$SELFDIR/race/race.jar"
+mkdir -p "$SELFDIR/race/keys"
 echo "  => $SELFDIR/race/race.jar"
+echo "  => $SELFDIR/race/keys/"
 
 # ── Openfire fork (4.5.0-SNAPSHOT) ───────────────────────────────────────────
 step "Building SBRW Openfire fork (4.5.0-SNAPSHOT)..."
