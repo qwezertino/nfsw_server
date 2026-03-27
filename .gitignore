@@ -11,6 +11,7 @@ data/mysql/
 target/
 *.jar
 !src/sbrw-mp-sync-2018/sbrw-mp.jar
+!src/openfire/starter/libs/i4jruntime.jar
 *.class
 *.war
 
