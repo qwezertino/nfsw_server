@@ -86,7 +86,8 @@ services:
   race:
     build: .
     restart: unless-stopped
-    command: java -jar race.jar 9998
+    env_file: .env
+    command: java -Dpassword=${DB_PASS} --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED -jar race.jar 9998
     working_dir: /sbrw/race
     volumes:
       - ./sbrw/race:/sbrw/race
