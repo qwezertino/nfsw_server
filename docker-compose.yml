@@ -12,6 +12,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./sql/mysql:/docker-entrypoint-initdb.d/sbrw:ro
+      - ./sql/openfire-db.sql:/docker-entrypoint-initdb.d/openfire-db.sql:ro
     networks:
       - sbrw_net
 
@@ -19,13 +20,17 @@ services:
   openfire:
     build: .
     restart: unless-stopped
-    command: bash bin/openfire.sh
+    entrypoint: /docker/openfire-entrypoint.sh
     working_dir: /sbrw/openfire
     volumes:
       - ./sbrw/openfire:/sbrw/openfire
     environment:
       JAVA_HOME: /opt/java/openjdk
       OPENFIRE_OPTS: "-Dcom.sun.security.enableCRLDP=false -Dcom.sun.security.ocsp.enable=false"
+      OPENFIRE_DB_HOST: mysql
+      OPENFIRE_DB_NAME: openfire_nfs
+      OPENFIRE_DB_USER: nfs_user
+      OPENFIRE_DB_PASS: qwerty123456
     ports:
       - "5222:5222"   # XMPP — game client connects here
       - "9090:9090"   # Admin console

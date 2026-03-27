@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jive>
+  <adminConsole>
+    <port>9090</port>
+    <securePort>9091</securePort>
+    <interface>0.0.0.0</interface>
+  </adminConsole>
+  <locale>en</locale>
+  <connectionProvider>
+    <className>org.jivesoftware.database.DefaultConnectionProvider</className>
+  </connectionProvider>
+  <database>
+    <defaultProvider>
+      <driver>com.mysql.cj.jdbc.Driver</driver>
+      <serverURL>jdbc:mysql://${OPENFIRE_DB_HOST}:3306/${OPENFIRE_DB_NAME}?rewriteBatchedStatements=true&amp;characterEncoding=UTF-8&amp;characterSetResults=UTF-8&amp;serverTimezone=UTC</serverURL>
+      <username>${OPENFIRE_DB_USER}</username>
+      <password>${OPENFIRE_DB_PASS}</password>
+      <testSQL>select 1</testSQL>
+      <testBeforeUse>false</testBeforeUse>
+      <testAfterUse>false</testAfterUse>
+      <testTimeout>500</testTimeout>
+      <timeBetweenEvictionRuns>30000</timeBetweenEvictionRuns>
+      <minIdleTime>900000</minIdleTime>
+      <maxWaitTime>500</maxWaitTime>
+      <minConnections>5</minConnections>
+      <maxConnections>25</maxConnections>
+      <connectionTimeout>1.0</connectionTimeout>
+    </defaultProvider>
+  </database>
+  <setup>true</setup>
+  <fqdn>localhost</fqdn>
+</jive>
