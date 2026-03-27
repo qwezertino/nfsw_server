@@ -1,0 +1,100 @@
+services:
+
+  # ─── MySQL ──────────────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: nfs_world
+      MYSQL_USER: nfs_user
+      MYSQL_PASSWORD: qwerty123456
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql/mysql:/docker-entrypoint-initdb.d/sbrw:ro
+    networks:
+      - sbrw_net
+
+  # ─── Openfire (XMPP) ────────────────────────────────────────────────────────
+  openfire:
+    build: .
+    restart: unless-stopped
+    command: bash bin/openfire.sh
+    working_dir: /sbrw/openfire
+    volumes:
+      - ./sbrw/openfire:/sbrw/openfire
+    environment:
+      JAVA_HOME: /opt/java/openjdk
+      OPENFIRE_OPTS: "-Dcom.sun.security.enableCRLDP=false -Dcom.sun.security.ocsp.enable=false"
+    ports:
+      - "5222:5222"   # XMPP — game client connects here
+      - "9090:9090"   # Admin console
+      - "7070:7070"   # HTTP binding (optional)
+      - "7443:7443"   # HTTPS binding (optional)
+    depends_on:
+      - mysql
+    networks:
+      - sbrw_net
+
+  # ─── Soapbox Core (Thorntail / REST API) ────────────────────────────────────
+  core:
+    build: .
+    restart: unless-stopped
+    command: java -Dthorntail.http.port=4444 -jar core.jar
+    working_dir: /sbrw/core
+    volumes:
+      - ./sbrw/core:/sbrw/core
+    ports:
+      - "4444:4444"   # HTTP REST API — game client connects here
+    depends_on:
+      - mysql
+      - openfire
+    networks:
+      - sbrw_net
+
+  # ─── Race server (sbrw-mp) ──────────────────────────────────────────────────
+  race:
+    build: .
+    restart: unless-stopped
+    command: java -jar race.jar 9998
+    working_dir: /sbrw/race
+    volumes:
+      - ./sbrw/race:/sbrw/race
+    ports:
+      - "9998:9998/udp"
+    networks:
+      - sbrw_net
+
+  # ─── Freeroam (Go UDP server) ────────────────────────────────────────────────
+  freeroam:
+    build: .
+    restart: unless-stopped
+    command: ./freeroamd
+    working_dir: /sbrw/freeroam
+    volumes:
+      - ./sbrw/freeroam:/sbrw/freeroam
+    ports:
+      - "9999:9999/udp"   # Main freeroam UDP
+      - "6996:6996"       # FMS HTTP (internal, used by core)
+    networks:
+      - sbrw_net
+
+  # ─── ModNet (static HTTP for powerups/events) ────────────────────────────────
+  modnet:
+    build: .
+    restart: unless-stopped
+    command: python3 -m http.server 8000
+    working_dir: /sbrw/modnet
+    volumes:
+      - ./sbrw/modnet:/sbrw/modnet
+    ports:
+      - "8000:8000"
+    networks:
+      - sbrw_net
+
+volumes:
+  mysql_data:
+
+networks:
+  sbrw_net:
+    driver: bridge
