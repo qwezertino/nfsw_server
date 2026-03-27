@@ -30,8 +30,8 @@ logs-core:
 logs-openfire:
 	docker compose logs -f openfire
 
-logs-mysql:
-	docker compose logs -f mysql
+logs-db:
+	docker compose logs -f database
 
 logs-freeroam:
 	docker compose logs -f freeroam

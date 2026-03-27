@@ -1,8 +1,8 @@
 services:
 
   # ─── MariaDB ─────────────────────────────────────────────────────────────────
-  mysql:
-    image: mariadb:11
+  database:
+    image: mariadb:10.6
     restart: unless-stopped
     env_file: .env          # gives init scripts access to SERVER_IP, OPENFIRE_TOKEN, etc.
     environment:
@@ -23,6 +23,10 @@ services:
       # openfire DB + ofProperty, schema import, UPPERCASE rename, PARAMETER values
       - ./sql/init-sbrw.sh:/docker-entrypoint-initdb.d/init-sbrw.sh:ro
       - ./sql/mysql:/sbrw-sql:ro
+      - ./sql/openfire-create-db.sql:/docker-sql/openfire-create-db.sql:ro
+      - ./sql/openfire-properties.sql:/docker-sql/openfire-properties.sql:ro
+      - ./sql/sbrw-parameters.sql:/docker-sql/sbrw-parameters.sql:ro
+      - ./src/openfire/distribution/src/database/openfire_mysql.sql:/openfire_mysql.sql:ro
     networks:
       - sbrw_net
 
@@ -37,7 +41,7 @@ services:
     environment:
       JAVA_HOME: /opt/java/openjdk
       OPENFIRE_OPTS: "-Dcom.sun.security.enableCRLDP=false -Dcom.sun.security.ocsp.enable=false"
-      OPENFIRE_DB_HOST: mysql
+      OPENFIRE_DB_HOST: database
       OPENFIRE_DB_NAME: ${OPENFIRE_DB_NAME:-openfire_nfs}
       OPENFIRE_DB_USER: ${DB_USER:-nfs_user}
       OPENFIRE_DB_PASS: ${DB_PASS:-qwerty123456}
@@ -46,8 +50,15 @@ services:
       - "9090:9090"   # Admin console
       - "7070:7070"   # HTTP binding (optional)
       - "7443:7443"   # HTTPS binding (optional)
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/5222' 2>/dev/null && exit 0 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
     depends_on:
-      - mysql
+      database:
+        condition: service_healthy
     networks:
       - sbrw_net
 
@@ -59,16 +70,16 @@ services:
     working_dir: /sbrw/core
     env_file: .env
     environment:
-      DB_HOST: mysql    # override .env — always use service name inside compose
+      DB_HOST: database    # override .env — always use service name inside compose
     volumes:
       - ./sbrw/core:/sbrw/core
     ports:
       - "${SERVER_PORT:-4444}:${SERVER_PORT:-4444}"
     depends_on:
-      mysql:
+      database:
         condition: service_healthy
       openfire:
-        condition: service_started
+        condition: service_healthy
     networks:
       - sbrw_net
 
