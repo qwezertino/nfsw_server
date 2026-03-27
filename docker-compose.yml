@@ -23,7 +23,6 @@ services:
       # openfire DB + ofProperty, schema import, UPPERCASE rename, PARAMETER values
       - ./sql/init-sbrw.sh:/docker-entrypoint-initdb.d/init-sbrw.sh:ro
       - ./sql/mysql:/sbrw-sql:ro
-      - ./sql/openfire-create-db.sql:/docker-sql/openfire-create-db.sql:ro
       - ./sql/openfire-properties.sql:/docker-sql/openfire-properties.sql:ro
       - ./sql/sbrw-parameters.sql:/docker-sql/sbrw-parameters.sql:ro
       - ./src/openfire/distribution/src/database/openfire_mysql.sql:/openfire_mysql.sql:ro

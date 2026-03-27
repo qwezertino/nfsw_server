@@ -39,6 +39,8 @@ public class OpenFireConnector {
 
     private String ipAddress;
 
+    private String xmppDomain;
+
     private Integer port;
 
     private String engineToken;
@@ -67,6 +69,7 @@ public class OpenFireConnector {
     @PostConstruct
     public void init() {
         this.ipAddress = parameterBO.getStrParam("XMPP_IP", "127.0.0.1");
+        this.xmppDomain = parameterBO.getStrParam("XMPP_DOMAIN", this.ipAddress);
         this.port = parameterBO.getIntParam("XMPP_PORT", 5222);
         this.engineToken = parameterBO.getStrParam("OPENFIRE_TOKEN");
         this.debugMode = parameterBO.getBoolParam("XMPP_DEBUG");
@@ -108,7 +111,7 @@ public class OpenFireConnector {
         message.setStanzaId("JN_1234567");
         message.setBody(msg);
         try {
-            message.setTo(JidCreate.entityBareFrom("sbrw." + personaId + "@" + ipAddress));
+            message.setTo(JidCreate.entityBareFrom("sbrw." + personaId + "@" + xmppDomain));
             connection.sendStanza(message);
         } catch (SmackException.NotConnectedException | InterruptedException | XmppStringprepException e) {
             throw new RuntimeException("Failed to send XMPP message", e);
@@ -120,7 +123,8 @@ public class OpenFireConnector {
             XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder()
                     .setUsernameAndPassword("sbrw.engine.engine", this.engineToken)
                     .setResource("EA_Chat")
-                    .setXmppDomain(this.ipAddress)
+                    .setXmppDomain(this.xmppDomain)
+                    .setHost(this.ipAddress)
                     .setPort(this.port)
                     .setCustomX509TrustManager(getX509TrustManager())
                     .setHostnameVerifier((hostname, session) -> true);

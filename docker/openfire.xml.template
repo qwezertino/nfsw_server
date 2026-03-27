@@ -28,5 +28,5 @@
     </defaultProvider>
   </database>
   <setup>true</setup>
-  <fqdn>localhost</fqdn>
+  <fqdn>openfire</fqdn>
 </jive>

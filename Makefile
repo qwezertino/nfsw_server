@@ -1,4 +1,4 @@
-.PHONY: deploy build up down configure logs
+.PHONY: deploy build up down logs
 
 # Full deploy: build artifacts then start all containers
 deploy: build up
@@ -15,13 +15,12 @@ up:
 down:
 	docker compose down
 
-# Apply configuration manually (for local/tmux setup, not needed in Docker)
-configure:
-	bash configure.sh
-
 # Tail logs from all services
 logs:
 	docker compose logs -f
+
+ps:
+	docker compose ps
 
 # Per-service logs
 logs-core:
