@@ -8,14 +8,21 @@ set -e
 REPOS="/home/qwezert/nfsw_server"
 SELFDIR="$REPOS/sbrw"
 
+# Load .env if present (overrides defaults below)
+if [[ -f "$REPOS/.env" ]]; then
+    set -a
+    source "$REPOS/.env"
+    set +a
+fi
+
 # --- Database config (soapbox core) ---
-DB_NAME="nfs_world"
-DB_USER="nfs_user"
-DB_PASS="qwerty123456"
-DB_HOST="localhost"
+DB_NAME="${DB_NAME:-nfs_world}"
+DB_USER="${DB_USER:-nfs_user}"
+DB_PASS="${DB_PASS:-qwerty123456}"
+DB_HOST="${DB_HOST:-localhost}"
 
 # --- Server port ---
-SERVER_PORT="4444"
+SERVER_PORT="${SERVER_PORT:-4444}"
 
 # -------------------------------------------------------
 # Helper: print step header
