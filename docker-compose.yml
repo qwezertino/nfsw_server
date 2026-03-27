@@ -5,10 +5,15 @@ services:
     image: mysql:8
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
       MYSQL_DATABASE: ${DB_NAME:-nfs_world}
       MYSQL_USER: ${DB_USER:-nfs_user}
       MYSQL_PASSWORD: ${DB_PASS:-qwerty123456}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     volumes:
       - mysql_data:/var/lib/mysql
       - ./sql/mysql:/docker-entrypoint-initdb.d/sbrw:ro
@@ -81,6 +86,23 @@ services:
     ports:
       - "9999:9999/udp"   # Main freeroam UDP
       - "6996:6996"       # FMS HTTP (internal, used by core)
+    networks:
+      - sbrw_net
+
+  # ─── Configure (one-shot: writes all parameters into both DBs) ─────────────
+  configure:
+    build: .
+    restart: on-failure
+    entrypoint: /docker/configure-entrypoint.sh
+    env_file: .env
+    environment:
+      DB_HOST: mysql                              # override .env — always mysql inside compose
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      openfire:
+        condition: service_started
     networks:
       - sbrw_net
 

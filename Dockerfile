@@ -2,8 +2,8 @@
 # Each service is defined in docker-compose.yml
 FROM eclipse-temurin:11-jre-alpine
 
-# Python 3 (modnet HTTP server) + bash (openfire scripts) + envsubst (openfire.xml templating)
-RUN apk add --no-cache python3 bash gettext
+# Python 3 (modnet HTTP server) + bash (openfire scripts) + envsubst (openfire.xml templating) + mysql-client (configure service)
+RUN apk add --no-cache python3 bash gettext mysql-client
 
 # Enable TLSv1/TLSv1.1 — required for the NFS World game client (uses TLSv1 for XMPP)
 RUN sed -i \
