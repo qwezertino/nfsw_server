@@ -1,4 +1,5 @@
 UPDATE PARAMETER SET `VALUE` = 'false'                                    WHERE `NAME` = 'ENABLE_REDIS';
+UPDATE PARAMETER SET `VALUE` = '1'                                        WHERE `NAME` = 'STARTING_LEVEL_NUMBER';
 UPDATE PARAMETER SET `VALUE` = 'http://${SERVER_IP}:${SERVER_PORT}'       WHERE `NAME` = 'SERVER_ADDRESS';
 UPDATE PARAMETER SET `VALUE` = '${OPENFIRE_TOKEN}'                        WHERE `NAME` = 'OPENFIRE_TOKEN';
 UPDATE PARAMETER SET `VALUE` = 'http://openfire:9090/plugins/restapi/v1'  WHERE `NAME` = 'OPENFIRE_ADDRESS';
