@@ -10,6 +10,15 @@ until mysqladmin ping -h"${DB_HOST}" -u"${DB_USER}" -p"${DB_PASS}" --silent 2>/d
 done
 echo "[configure] MySQL is ready."
 
+# MySQL healthcheck passes as soon as the daemon starts, but docker-entrypoint
+# init scripts (schema import) may still be running. Wait for the PARAMETER table.
+echo "[configure] Waiting for ${DB_NAME}.PARAMETER table (init scripts may still be running)..."
+until mysql -h"${DB_HOST}" -u"${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" \
+    -e 'SELECT 1 FROM PARAMETER LIMIT 1' 2>/dev/null; do
+    sleep 3
+done
+echo "[configure] Schema ready."
+
 echo "[configure] Configuring nfs_world parameters..."
 mysql -h"${DB_HOST}" -u"${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" <<SQL
 UPDATE PARAMETER SET \`VALUE\` = 'false'                                              WHERE \`NAME\` = 'ENABLE_REDIS';

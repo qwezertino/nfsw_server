@@ -41,7 +41,10 @@ mkdir -p "$SELFDIR/openfire/plugins"
 # -------------------------------------------------------
 # Optional: initialize / re-import the database schema.
 # Pass --init-db as the first argument to enable this.
-# NOTE: uses --force so it's safe to re-run
+#
+# NOTE: This is for LOCAL / tmux development only.
+#       In Docker, sql/init-sbrw.sh runs automatically on
+#       first MySQL container creation — no --init-db needed.
 # -------------------------------------------------------
 if [[ "${1}" == "--init-db" ]]; then
     step "Setting up databases..."

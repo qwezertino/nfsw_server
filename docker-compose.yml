@@ -16,7 +16,9 @@ services:
       retries: 10
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./sql/mysql:/docker-entrypoint-initdb.d/sbrw:ro
+      # init-sbrw.sh runs on first container creation: imports schema+data with correct DB name
+      - ./sql/init-sbrw.sh:/docker-entrypoint-initdb.d/init-sbrw.sh:ro
+      - ./sql/mysql:/sbrw-sql:ro
       - ./sql/openfire-db.sql:/docker-entrypoint-initdb.d/openfire-db.sql:ro
     networks:
       - sbrw_net
