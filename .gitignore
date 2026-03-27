@@ -10,6 +10,7 @@ data/mysql/
 # Java build artifacts
 target/
 *.jar
+!src/sbrw-mp-sync-2018/sbrw-mp.jar
 *.class
 *.war
 
