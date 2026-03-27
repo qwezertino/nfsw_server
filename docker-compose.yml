@@ -107,6 +107,20 @@ services:
 
 volumes:
   mysql_data:
+  maven_cache:
+
+  # ─── Builder (compile-only, not a runtime service) ──────────────────────────
+  builder:
+    build:
+      context: .
+      dockerfile: Dockerfile.builder
+    env_file: .env
+    volumes:
+      - .:/workspace        # full repo mounted — build outputs go to ./sbrw/
+      - maven_cache:/root/.m2   # cache Maven deps between builds
+    working_dir: /workspace
+    profiles:
+      - build  # only runs via: docker compose run --rm builder
 
 networks:
   sbrw_net:

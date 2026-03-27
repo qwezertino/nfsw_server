@@ -3,9 +3,9 @@
 # Full deploy: build artifacts then start all containers
 deploy: build up
 
-# Build all artifacts (Go, Java, download plugins) into sbrw/
+# Build all artifacts inside Docker (no local Maven/Go/Java required)
 build:
-	bash build.sh
+	docker compose run --rm builder
 
 # Start all services (rebuild Docker image if Dockerfile changed)
 up:

@@ -5,7 +5,8 @@
 # ============================================================
 set -e
 
-REPOS="/home/qwezert/nfsw_server"
+# Resolve repo root relative to this script — works both on host and inside Docker
+REPOS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SELFDIR="$REPOS/sbrw"
 
 # Load .env if present (overrides defaults below)
@@ -150,7 +151,8 @@ echo "  Race copied => $SELFDIR/race/race.jar"
 # Build SBRW Openfire fork (4.5.0-SNAPSHOT) from source
 # -------------------------------------------------------
 OPENFIRE_SRC="$REPOS/src/openfire"
-JAVA8_HOME="/usr/lib/jvm/java-1.8.0-openjdk-amd64"
+# Inside Dockerfile.builder Java 8 is the default JDK; on host override via JAVA8_HOME env var
+JAVA8_HOME="${JAVA8_HOME:-${JAVA_HOME:-/opt/java/openjdk}}"
 
 step "Building SBRW Openfire fork (4.5.0-SNAPSHOT)..."
 cd "$OPENFIRE_SRC"
