@@ -107,9 +107,6 @@ services:
     networks:
       - sbrw_net
 
-volumes:
-  maven_cache:
-
   # ─── Builder (compile-only, not a runtime service) ──────────────────────────
   builder:
     build:
@@ -117,11 +114,14 @@ volumes:
       dockerfile: Dockerfile.builder
     env_file: .env
     volumes:
-      - .:/workspace        # full repo mounted — build outputs go to ./sbrw/
+      - .:/workspace            # full repo mounted — build outputs go to ./sbrw/
       - maven_cache:/root/.m2   # cache Maven deps between builds
     working_dir: /workspace
     profiles:
       - build  # only runs via: docker compose run --rm builder
+
+volumes:
+  maven_cache:
 
 networks:
   sbrw_net:
