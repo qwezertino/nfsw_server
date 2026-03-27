@@ -5,7 +5,7 @@ deploy: build up
 
 # Build all artifacts inside Docker (no local Maven/Go/Java required)
 build:
-	docker compose run --rm builder
+	docker compose run --rm --build builder
 
 # Start all services (rebuild Docker image if Dockerfile changed)
 up:
