@@ -1,1 +1,0 @@
-java -Dpassword=yourpass -jar sbrw-mp.jar 9998
