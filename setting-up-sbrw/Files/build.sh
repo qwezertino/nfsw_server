@@ -137,20 +137,19 @@ cp -f "$REPOS/sbrw-mp-sync-2018/sbrw-mp.jar" "$SELFDIR/race/race.jar"
 echo "  Race copied => $SELFDIR/race/race.jar"
 
 # -------------------------------------------------------
-# Download Openfire 4.9.2 pre-built distribution
+# Build SBRW Openfire fork (4.5.0-SNAPSHOT) from source
 # -------------------------------------------------------
-OPENFIRE_VERSION="4_9_2"
-OPENFIRE_TARBALL="openfire_${OPENFIRE_VERSION}.tar.gz"
-OPENFIRE_URL="https://github.com/igniterealtime/Openfire/releases/download/v${OPENFIRE_VERSION//_/.}/${OPENFIRE_TARBALL}"
+OPENFIRE_SRC="$REPOS/openfire"
+JAVA8_HOME="/usr/lib/jvm/java-1.8.0-openjdk-amd64"
 
-step "Downloading Openfire ${OPENFIRE_VERSION//_/.}..."
-cd /tmp
-if [[ ! -f "$OPENFIRE_TARBALL" ]]; then
-    curl -L -o "$OPENFIRE_TARBALL" "$OPENFIRE_URL"
-fi
+step "Building SBRW Openfire fork (4.5.0-SNAPSHOT)..."
+cd "$OPENFIRE_SRC"
+JAVA_HOME="$JAVA8_HOME" mvn install -pl xmppserver -am -DskipTests -q
+JAVA_HOME="$JAVA8_HOME" mvn package -pl distribution -am -DskipTests -q
+
 rm -rf "$SELFDIR/openfire"
-mkdir -p "$SELFDIR/openfire"
-tar -xzf "$OPENFIRE_TARBALL" --strip-components=1 -C "$SELFDIR/openfire"
+mkdir -p "$SELFDIR/openfire/plugins"
+cp -r "$OPENFIRE_SRC/distribution/target/distribution-base/." "$SELFDIR/openfire/"
 chmod +x "$SELFDIR/openfire/bin/openfire.sh"
 # Bind admin console to all interfaces so it's reachable from outside (incl. Windows/remote)
 sed -i 's|<interface>127.0.0.1</interface>|<interface>0.0.0.0</interface>|g' "$SELFDIR/openfire/conf/openfire.xml" 2>/dev/null || true
@@ -160,25 +159,19 @@ if [[ -f "$JAVA11_SECURITY" ]]; then
     sudo sed -i 's/jdk.tls.disabledAlgorithms=SSLv3, TLSv1, TLSv1.1, DTLSv1.0,/jdk.tls.disabledAlgorithms=SSLv3, DTLSv1.0,/' "$JAVA11_SECURITY" 2>/dev/null || true
     echo "  TLSv1 enabled in Java 11 security policy"
 fi
-echo "  Openfire 4.9.2 => $SELFDIR/openfire/"
+echo "  SBRW Openfire 4.5.0-SNAPSHOT => $SELFDIR/openfire/"
 
 # -------------------------------------------------------
-# Build Openfire RestAPI plugin
+# Download Openfire plugins (prebuilt, compatible with 4.5.0)
 # -------------------------------------------------------
-step "Building Openfire RestAPI Plugin..."
-cd "$REPOS/openfire-restAPI-plugin"
-mvn clean package -q -DskipTests
-cp -f "target/restAPI-openfire-plugin-assembly.jar" "$SELFDIR/openfire/plugins/restAPI.jar"
-echo "  RestAPI Plugin => $SELFDIR/openfire/plugins/restAPI.jar"
+step "Downloading Openfire plugins..."
+curl -sSL -o "$SELFDIR/openfire/plugins/restAPI.jar" \
+    "https://www.igniterealtime.org/projects/openfire/plugins/1.4.0/restAPI.jar"
+echo "  RestAPI 1.4.0 => $SELFDIR/openfire/plugins/restAPI.jar"
 
-# -------------------------------------------------------
-# Build Openfire Non-SASL Auth plugin
-# -------------------------------------------------------
-step "Building Openfire Non-SASL Auth Plugin..."
-cd "$REPOS/openfire-nonSaslAuthentication-plugin"
-mvn clean package -q -DskipTests
-cp -f "target/nonSaslAuthentication-openfire-plugin-assembly.jar" "$SELFDIR/openfire/plugins/nonSaslAuthentication.jar"
-echo "  Non-SASL Plugin => $SELFDIR/openfire/plugins/nonSaslAuthentication.jar"
+curl -sSL -o "$SELFDIR/openfire/plugins/nonSaslAuthentication.jar" \
+    "https://www.igniterealtime.org/projects/openfire/plugins/1.0.1/nonSaslAuthentication.jar"
+echo "  NonSaslAuthentication 1.0.1 => $SELFDIR/openfire/plugins/nonSaslAuthentication.jar"
 
 # -------------------------------------------------------
 # Done
