@@ -1,8 +1,8 @@
 services:
 
-  # ─── MySQL ──────────────────────────────────────────────────────────────────
+  # ─── MariaDB ─────────────────────────────────────────────────────────────────
   mysql:
-    image: mysql:8
+    image: mariadb:11
     restart: unless-stopped
     env_file: .env          # gives init scripts access to SERVER_IP, OPENFIRE_TOKEN, etc.
     environment:
@@ -11,7 +11,7 @@ services:
       MYSQL_USER: ${DB_USER:-nfs_user}
       MYSQL_PASSWORD: ${DB_PASS:-qwerty123456}
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -55,15 +55,20 @@ services:
   core:
     build: .
     restart: unless-stopped
-    command: java -Dthorntail.http.port=${SERVER_PORT:-4444} -jar core.jar
+    entrypoint: /docker/core-entrypoint.sh
     working_dir: /sbrw/core
+    env_file: .env
+    environment:
+      DB_HOST: mysql    # override .env — always use service name inside compose
     volumes:
       - ./sbrw/core:/sbrw/core
     ports:
-      - "${SERVER_PORT:-4444}:${SERVER_PORT:-4444}"   # HTTP REST API — game client connects here
+      - "${SERVER_PORT:-4444}:${SERVER_PORT:-4444}"
     depends_on:
-      - mysql
-      - openfire
+      mysql:
+        condition: service_healthy
+      openfire:
+        condition: service_started
     networks:
       - sbrw_net
 

@@ -81,18 +81,19 @@ cd "$REPOS/src/soapbox-race-core"
 mvn clean package -q -DskipTests
 cp -f "target/core-thorntail.jar" "$SELFDIR/core/core.jar"
 
-# Write a configured project-defaults.yml into the output dir
-cat > "$SELFDIR/core/project-defaults.yml" <<YAML
+# Write project-defaults.yml — DB connection vars use Thorntail EL ${env.VAR:default}
+# so they are resolved at runtime from the container environment, not baked in at build time.
+cat > "$SELFDIR/core/project-defaults.yml" <<'YAML'
 thorntail:
   http:
-    port: ${SERVER_PORT}
+    port: ${env.SERVER_PORT:4444}
   datasources:
     data-sources:
       SoapBoxDS:
         driver-name: mysql
-        connection-url: jdbc:mysql://${DB_HOST}:3306/${DB_NAME}
-        user-name: ${DB_USER}
-        password: ${DB_PASS}
+        connection-url: jdbc:mysql://${env.DB_HOST:localhost}:3306/${env.DB_NAME:nfs_world}
+        user-name: ${env.DB_USER:nfs_user}
+        password: ${env.DB_PASS:qwerty123456}
         valid-connection-checker-class-name: org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker
         validate-on-match: true
         background-validation: false
