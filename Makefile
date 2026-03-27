@@ -22,3 +22,22 @@ configure:
 # Tail logs from all services
 logs:
 	docker compose logs -f
+
+# Per-service logs
+logs-core:
+	docker compose logs -f core
+
+logs-openfire:
+	docker compose logs -f openfire
+
+logs-mysql:
+	docker compose logs -f mysql
+
+logs-freeroam:
+	docker compose logs -f freeroam
+
+logs-race:
+	docker compose logs -f race
+
+logs-modnet:
+	docker compose logs -f modnet

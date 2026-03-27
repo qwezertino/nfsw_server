@@ -5,8 +5,8 @@
 SBRW_DB="${MYSQL_DATABASE:-nfs_world}"
 OF_DB="${OPENFIRE_DB_NAME:-openfire_nfs}"
 
-# Connect as root via unix socket (no password needed in init context)
-SQL() { mysql -u root "$@"; }
+# Connect as root with password (MariaDB 11 requires it even in init context)
+SQL() { mariadb -u root -p"${MYSQL_ROOT_PASSWORD}" "$@"; }
 
 echo "[init-sbrw] === Starting initialization ==="
 echo "[init-sbrw] SBRW_DB=${SBRW_DB}  OF_DB=${OF_DB}  SERVER_IP=${SERVER_IP}"
@@ -69,7 +69,7 @@ UPDATE PARAMETER SET \`VALUE\` = '${SERVER_IP}'                             WHER
 INSERT INTO PARAMETER (\`NAME\`, \`VALUE\`) VALUES ('MODDING_ENABLED', 'true')
     ON DUPLICATE KEY UPDATE \`VALUE\` = 'true';
 INSERT INTO PARAMETER (\`NAME\`, \`VALUE\`) VALUES ('MODDING_BASE_PATH', 'http://${SERVER_IP}:8000')
-    ON DUPLICATE KEY UPDATE \`VALUE\` = 'http://${SERVER_IP}:8000'\;
+    ON DUPLICATE KEY UPDATE \`VALUE\` = 'http://${SERVER_IP}:8000';
 INSERT INTO PARAMETER (\`NAME\`, \`VALUE\`) VALUES ('MODDING_FEATURES', '')
     ON DUPLICATE KEY UPDATE \`VALUE\` = '';
 INSERT INTO PARAMETER (\`NAME\`, \`VALUE\`) VALUES ('MODDING_SERVER_ID', '${MODDING_SERVER_ID:-sbrw-private}')
