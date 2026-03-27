@@ -4,6 +4,7 @@ services:
   mysql:
     image: mysql:8
     restart: unless-stopped
+    env_file: .env          # gives init scripts access to SERVER_IP, OPENFIRE_TOKEN, etc.
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
       MYSQL_DATABASE: ${DB_NAME:-nfs_world}
@@ -16,10 +17,10 @@ services:
       retries: 10
     volumes:
       - mysql_data:/var/lib/mysql
-      # init-sbrw.sh runs on first container creation: imports schema+data with correct DB name
+      # init-sbrw.sh runs once on first container creation — handles everything:
+      # openfire DB + ofProperty, schema import, UPPERCASE rename, PARAMETER values
       - ./sql/init-sbrw.sh:/docker-entrypoint-initdb.d/init-sbrw.sh:ro
       - ./sql/mysql:/sbrw-sql:ro
-      - ./sql/openfire-db.sql:/docker-entrypoint-initdb.d/openfire-db.sql:ro
     networks:
       - sbrw_net
 
@@ -88,23 +89,6 @@ services:
     ports:
       - "9999:9999/udp"   # Main freeroam UDP
       - "6996:6996"       # FMS HTTP (internal, used by core)
-    networks:
-      - sbrw_net
-
-  # ─── Configure (one-shot: writes all parameters into both DBs) ─────────────
-  configure:
-    build: .
-    restart: on-failure
-    entrypoint: /docker/configure-entrypoint.sh
-    env_file: .env
-    environment:
-      DB_HOST: mysql                              # override .env — always mysql inside compose
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-    depends_on:
-      mysql:
-        condition: service_healthy
-      openfire:
-        condition: service_started
     networks:
       - sbrw_net
 
