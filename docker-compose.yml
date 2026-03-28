@@ -87,12 +87,15 @@ services:
     build: .
     restart: unless-stopped
     env_file: .env
-    command: java -Dpassword=${DB_PASS} --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED -jar race.jar 9998
+    command: java --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED -jar race.jar 9998
     working_dir: /sbrw/race
+    environment:
+      DB_HOST: database    # override .env — localhost won't work inside Docker
     volumes:
       - ./sbrw/race:/sbrw/race
     ports:
       - "9998:9998/udp"
+      - "9998:9998/tcp"   # race server may use both TCP and UDP
     networks:
       - sbrw_net
 
