@@ -122,11 +122,9 @@ public class OpenFireRestApiCli {
         if (!restApiEnabled) {
             return new ArrayList<>();
         }
-        Builder builder = getBuilder("chatrooms/forUser",
-                Map.of(
-                        "userName", "sbrw." + personaId,
-                        "domain", xmppIp,
-                        "resource", "EA-Chat"));
+        // chatrooms/forUser does not exist in any version of the REST API plugin.
+        // Instead, search for all group channel rooms and find the one this persona occupies.
+        Builder builder = getBuilder("chatrooms", Map.of("search", "group.channel."));
         MUCRoomEntities roomEntities = builder.get(MUCRoomEntities.class);
         List<MUCRoomEntity> listRoomEntity = roomEntities.getMucRooms();
         for (MUCRoomEntity entity : listRoomEntity) {
@@ -134,7 +132,10 @@ public class OpenFireRestApiCli {
             if (roomName.contains("group.channel.")) {
                 // FIXME: apparently we need to make the request TWICE, first one will always fail for some reason
                 getAllOccupantsInRoom(roomName);
-                return getAllOccupantsInRoom(roomName);
+                List<Long> occupants = getAllOccupantsInRoom(roomName);
+                if (occupants.contains(personaId)) {
+                    return occupants;
+                }
             }
         }
         return new ArrayList<>();
