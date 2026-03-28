@@ -1,4 +1,4 @@
-.PHONY: deploy build up down logs
+.PHONY: deploy build build-core up down logs
 
 # Full deploy: build artifacts then start all containers
 deploy: build up
@@ -6,6 +6,12 @@ deploy: build up
 # Build all artifacts inside Docker (no local Maven/Go/Java required)
 build:
 	docker compose run --rm --build builder
+
+# Build only soapbox-race-core and restart its container
+build-core:
+	cd src/soapbox-race-core && mvn package -q -DskipTests
+	cp -f src/soapbox-race-core/target/core-thorntail.jar sbrw/core/core.jar
+	docker compose up -d --build core
 
 # Start all services (rebuild Docker image if Dockerfile changed)
 up:
